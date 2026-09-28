@@ -32,3 +32,8 @@ def cell_for(lat: float, lon: float) -> tuple[int, int]:
 
 def cell_centre(i: int, j: int) -> tuple[float, float]:
     return round((i + 0.5) * CELL_LAT, 3), round((j + 0.5) * CELL_LON, 3)
+
+
+def signal_update(entry_id: str) -> str:
+    """Dispatcher signal fired whenever the reporter's state changes."""
+    return f"{DOMAIN}_update_{entry_id}"

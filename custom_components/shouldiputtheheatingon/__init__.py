@@ -17,10 +17,13 @@ from homeassistant.const import (
     STATE_ON,
     STATE_UNAVAILABLE,
     STATE_UNKNOWN,
+    Platform,
     UnitOfTemperature,
 )
 from homeassistant.core import Event, EventStateChangedData, HomeAssistant, callback
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
+from homeassistant.helpers.device_registry import DeviceEntryType, DeviceInfo
+from homeassistant.helpers.dispatcher import async_dispatcher_send
 from homeassistant.helpers.event import (
     async_call_later,
     async_track_state_change_event,
@@ -39,15 +42,26 @@ from .const import (
     CONF_OUTDOOR,
     CONF_TOKEN,
     CONF_URL,
+    DOMAIN,
     MIN_SECONDS_BETWEEN_REPORTS,
     REPORT_INTERVAL,
+    signal_update,
 )
 
 _LOGGER = logging.getLogger(__name__)
 HEATING_ACTIONS = {"heating", "preheating"}
 BAD_STATES = {STATE_UNKNOWN, STATE_UNAVAILABLE}
+PLATFORMS: list[Platform] = [Platform.SENSOR, Platform.BINARY_SENSOR]
 
 type HeatingConfigEntry = ConfigEntry[Reporter]
+
+
+def device_info(entry: HeatingConfigEntry) -> DeviceInfo:
+    return DeviceInfo(
+        identifiers={(DOMAIN, entry.entry_id)},
+        name="Should I put the heating on?",
+        entry_type=DeviceEntryType.SERVICE,
+    )
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: HeatingConfigEntry) -> bool:
@@ -61,12 +75,13 @@ async def async_setup_entry(hass: HomeAssistant, entry: HeatingConfigEntry) -> b
     entry.async_on_unload(entry.add_update_listener(_async_update_listener))
     entry.async_on_unload(reporter.cancel_pending)
 
+    await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     entry.async_create_background_task(hass, reporter.async_report(), "shouldiputtheheatingon initial report")
     return True
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: HeatingConfigEntry) -> bool:
-    return True
+    return await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
 
 
 async def async_remove_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
@@ -90,7 +105,7 @@ class Reporter:
         self.entry = entry
         self.api = api
         self.last_report: datetime | None = None
-        self._last_heating_on: bool | None = None
+        self.last_heating_on: bool | None = None
         self._auth_error_logged = False
         self._pending = None
 
@@ -183,13 +198,14 @@ class Reporter:
             return
         self._auth_error_logged = False
         self.last_report = dt_util.utcnow()
-        self._last_heating_on = payload["heating_on"]
+        self.last_heating_on = payload["heating_on"]
+        async_dispatcher_send(self.hass, signal_update(self.entry.entry_id))
 
     @callback
     def async_state_changed(self, event: Event[EventStateChangedData]) -> None:
         """Report promptly when the heating switches on or off, not just every 5 minutes."""
         climate = self.hass.states.get(self.entry.options[CONF_CLIMATE])
-        if climate is None or self._heating_on(climate) == self._last_heating_on:
+        if climate is None or self._heating_on(climate) == self.last_heating_on:
             return
         if self._pending:
             return
