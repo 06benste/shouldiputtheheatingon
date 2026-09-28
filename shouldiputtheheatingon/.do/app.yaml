@@ -1,0 +1,81 @@
+# DigitalOcean App Platform spec.
+# Create:  doctl apps create --spec .do/app.yaml
+# Update:  doctl apps update <app-id> --spec .do/app.yaml
+name: shouldiputtheheatingon
+region: lon            # London; closest to UK users
+
+# Uncomment once the domain's DNS is pointed at DigitalOcean.
+# domains:
+#   - domain: shouldiputtheheatingon.com
+#     type: PRIMARY
+#   - domain: www.shouldiputtheheatingon.com
+#     type: ALIAS
+
+services:
+  - name: web
+    github:
+      repo: 06benste/shouldiputtheheatingon
+      branch: main
+      deploy_on_push: true
+    dockerfile_path: Dockerfile
+    http_port: 8000
+    # Keep at 1: rate limits are held in memory (see README before scaling).
+    instance_count: 1
+    instance_size_slug: apps-s-1vcpu-0.5gb
+    routes:
+      - path: /
+    health_check:
+      http_path: /healthz
+      initial_delay_seconds: 10
+      period_seconds: 15
+      failure_threshold: 3
+    envs:
+      - key: DATABASE_URL
+        scope: RUN_TIME
+        value: ${db.DATABASE_URL}
+      - key: CLIENT_IP_HEADER
+        scope: RUN_TIME
+        value: do-connecting-ip
+      - key: MIN_HOMES_PER_CELL
+        scope: RUN_TIME
+        value: "3"
+      - key: STALE_AFTER_MINUTES
+        scope: RUN_TIME
+        value: "30"
+      - key: MIN_REPORT_INTERVAL_SECONDS
+        scope: RUN_TIME
+        value: "60"
+      - key: REGISTRATIONS_PER_IP_PER_HOUR
+        scope: RUN_TIME
+        value: "5"
+      - key: DELETE_INACTIVE_AFTER_DAYS
+        scope: RUN_TIME
+        value: "30"
+      - key: PURGE_INTERVAL_MINUTES
+        scope: RUN_TIME
+        value: "60"
+      - key: DB_POOL_SIZE
+        scope: RUN_TIME
+        value: "5"
+      - key: DB_MAX_OVERFLOW
+        scope: RUN_TIME
+        value: "5"
+      - key: LOG_LEVEL
+        scope: RUN_TIME
+        value: INFO
+
+databases:
+  # Dev database: cheap and fine to start with, created alongside the app.
+  - name: db
+    engine: PG
+    version: "16"
+    production: false
+
+  # For a managed production cluster, create it first (Databases > Create),
+  # then replace the block above with:
+  # - name: db
+  #   engine: PG
+  #   production: true
+  #   cluster_name: heating-db
+  #   db_name: heating
+  #   db_user: heating

@@ -1,0 +1,12 @@
+{
+  "domain": "shouldiputtheheatingon",
+  "name": "Should I put the heating on?",
+  "codeowners": ["@06benste"],
+  "config_flow": true,
+  "documentation": "https://github.com/06benste/shouldiputtheheatingon",
+  "integration_type": "service",
+  "iot_class": "cloud_push",
+  "issue_tracker": "https://github.com/06benste/shouldiputtheheatingon/issues",
+  "requirements": [],
+  "version": "0.1.0"
+}

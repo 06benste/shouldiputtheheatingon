@@ -1,0 +1,23 @@
+services:
+  app:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql+psycopg://heating:heating@db/heating
+      CLIENT_IP_HEADER: ""
+      MIN_HOMES_PER_CELL: "3"
+    depends_on:
+      - db
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: heating
+      POSTGRES_PASSWORD: heating
+      POSTGRES_DB: heating
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+volumes:
+  pgdata:
