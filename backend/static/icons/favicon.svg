@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#2f6fdb"/>
+      <stop offset="100%" stop-color="#e0322b"/>
+    </linearGradient>
+  </defs>
+
+  <!-- rising heat -->
+  <g fill="none" stroke="#e0322b" stroke-width="15" stroke-linecap="round">
+    <path d="M155 195 C175 165 135 145 155 115 C175 85 135 65 155 38" opacity=".35"/>
+    <path d="M256 195 C276 160 216 135 256 100 C286 72 236 55 256 26" opacity=".55"/>
+    <path d="M357 195 C377 165 337 145 357 115 C377 85 337 65 357 38" opacity=".35"/>
+  </g>
+
+  <!-- radiator -->
+  <g>
+    <rect x="132" y="402" width="20" height="46" rx="7" fill="#1c2b36"/>
+    <rect x="360" y="402" width="20" height="46" rx="7" fill="#1c2b36"/>
+    <rect x="96" y="216" width="320" height="192" rx="22" fill="url(#g)"/>
+    <g stroke="#ffffff" stroke-opacity=".5" stroke-width="11" stroke-linecap="round">
+      <line x1="141" y1="238" x2="141" y2="386"/>
+      <line x1="196" y1="238" x2="196" y2="386"/>
+      <line x1="251" y1="238" x2="251" y2="386"/>
+      <line x1="306" y1="238" x2="306" y2="386"/>
+      <line x1="361" y1="238" x2="361" y2="386"/>
+    </g>
+  </g>
+</svg>

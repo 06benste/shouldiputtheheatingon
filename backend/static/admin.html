@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
 <title>Admin — Should I put the heating on?</title>
+<link rel="icon" href="/icons/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
@@ -36,6 +37,9 @@ tr:last-child td{border-bottom:none}
 .on{color:var(--hot);font-weight:700}
 .off{color:var(--cold);font-weight:700}
 .count{color:var(--muted);font-size:13px;margin:0 0 10px}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
+.bar .count{margin:0}
+button.ghost{background:transparent;color:var(--ink);border-color:var(--line);margin-top:0}
 .wrap{overflow-x:auto}
 [hidden]{display:none!important}
 </style>
@@ -52,7 +56,10 @@ tr:last-child td{border-bottom:none}
 </section>
 
 <section id="data" hidden>
-  <p class="count" id="count"></p>
+  <div class="bar">
+    <p class="count" id="count"></p>
+    <button class="ghost" id="logout">Log out</button>
+  </div>
   <div class="wrap">
     <table>
       <thead>
@@ -75,6 +82,7 @@ const goBtn = document.getElementById('go');
 const errEl = document.getElementById('err');
 const rowsEl = document.getElementById('rows');
 const countEl = document.getElementById('count');
+const logoutBtn = document.getElementById('logout');
 
 let authHeader = sessionStorage.getItem('adminAuth') || '';
 let refreshTimer = null;
@@ -128,6 +136,12 @@ goBtn.addEventListener('click', () => {
   tryLoad();
 });
 pwInput.addEventListener('keydown', e => { if (e.key === 'Enter') goBtn.click(); });
+logoutBtn.addEventListener('click', () => {
+  sessionStorage.removeItem('adminAuth');
+  authHeader = '';
+  pwInput.value = '';
+  showLogin('');
+});
 
 if (authHeader) tryLoad();
 </script>

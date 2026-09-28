@@ -4,6 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Should I put the heating on?</title>
+<link rel="icon" href="/icons/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/icons/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="/icons/favicon-16.png" sizes="16x16" type="image/png">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#e0322b">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
@@ -63,6 +69,8 @@ label.tog{display:flex;align-items:center;gap:6px;font-size:14px;color:var(--mut
 .sheet ol{padding-left:20px;margin:6px 0}
 code{font-size:13px;background:var(--line);padding:1px 5px;border-radius:5px}
 .note{font-size:13px;color:var(--muted)}
+.sheet a{color:var(--ink)}
+.note a{color:var(--muted)}
 
 .leaflet-control-zoom a{background:var(--panel)!important;color:var(--ink)!important;border-color:var(--line)!important}
 .leaflet-control-attribution{background:transparent!important;color:var(--muted)!important;font-size:10px}
@@ -146,7 +154,8 @@ map.attributionControl.setPrefix(false).addAttribution('Outlines: Natural Earth'
 map.zoomControl.setPosition('bottomright');
 map.setMaxBounds([[47.5, -13.5], [61.5, 4]]);   // keep the view on the British Isles
 const css = () => getComputedStyle(document.documentElement);
-const landLayer = L.geoJSON(LAND, { interactive: false, style: () => ({ color: css().getPropertyValue('--coast').trim(), weight: 1, fillColor: css().getPropertyValue('--land').trim(), fillOpacity: 1 }) }).addTo(map);
+const UK_IRELAND = new Set(['GBR', 'IRL', 'IMN']);   // Great Britain, Ireland, Isle of Man — no neighbouring countries
+const landLayer = L.geoJSON(LAND, { filter: f => UK_IRELAND.has(f.properties.n), interactive: false, style: () => ({ color: css().getPropertyValue('--coast').trim(), weight: 1, fillColor: css().getPropertyValue('--land').trim(), fillOpacity: 1 }) }).addTo(map);
 matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () =>
   landLayer.setStyle({ color: css().getPropertyValue('--coast').trim(), fillColor: css().getPropertyValue('--land').trim() }));
 
@@ -299,7 +308,7 @@ function openConnect() {
     <h2>Share your heating</h2>
     <p class="sub">Add your home to the map. Only a rough area and your heating readings are shared.</p>
     <h3>Home Assistant</h3>
-    <ol><li>In HACS, add this site's integration repository and install <b>Should I put the heating on?</b></li>
+    <ol><li>In HACS, add <a href="https://github.com/06benste/shouldiputtheheatingon" target="_blank" rel="noopener">this site's integration repository</a> and install <b>Should I put the heating on?</b></li>
       <li>Restart Home Assistant, then go to Settings, Devices &amp; services, Add integration.</li>
       <li>Pick your thermostat and an outdoor temperature sensor, plus an optional indoor sensor.</li></ol>
     <h3>Hive</h3>
@@ -307,7 +316,8 @@ function openConnect() {
     <h3>What gets shared</h3>
     <p>Heating on or off, target temperature, indoor temperature, and the reading from your outdoor sensor. Your location is rounded to a 5 km square inside Home Assistant before anything is sent.</p>
     <h3>Stop sharing</h3>
-    <p>Delete the integration in Home Assistant. Your home is removed from this site straight away.</p>`;
+    <p>Delete the integration in Home Assistant. Your home is removed from this site straight away.</p>
+    <p class="note"><a href="https://github.com/06benste/shouldiputtheheatingon" target="_blank" rel="noopener">Source code on GitHub</a></p>`;
   sheet.classList.add('open'); sheet.scrollTop = 0;
 }
 document.getElementById('connectBtn').addEventListener('click', openConnect);

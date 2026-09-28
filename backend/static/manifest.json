@@ -1,0 +1,13 @@
+{
+  "name": "Should I put the heating on?",
+  "short_name": "Heating?",
+  "description": "A live map of homes with their heating on.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#d7e4ec",
+  "theme_color": "#e0322b",
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
