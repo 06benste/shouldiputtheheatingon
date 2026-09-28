@@ -35,6 +35,8 @@ class Settings:
     client_ip_header = os.getenv("CLIENT_IP_HEADER", "").strip().lower()
     cors_origins = [o.strip() for o in os.getenv("CORS_ORIGINS", "").split(",") if o.strip()]
     log_level = os.getenv("LOG_LEVEL", "INFO").upper()
+    # Unset by default: the /admin page refuses all access until this is set.
+    admin_password = os.getenv("ADMIN_PASSWORD", "")
 
 
 settings = Settings()

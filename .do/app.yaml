@@ -63,6 +63,10 @@ services:
       - key: LOG_LEVEL
         scope: RUN_TIME
         value: INFO
+      # Set the actual value in the dashboard (Settings > Environment Variables), not here.
+      - key: ADMIN_PASSWORD
+        scope: RUN_TIME
+        type: SECRET
 
 databases:
   # Dev database: cheap and fine to start with, created alongside the app.

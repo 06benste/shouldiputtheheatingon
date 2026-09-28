@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Admin — Should I put the heating on?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1c2b36; --muted:#5d6d78; --panel:#ffffff; --line:#dfe5e9; --bg:#f3f4ef;
+  --hot:#e0322b; --cold:#2f6fdb;
+  --display:"Bricolage Grotesque", "Arial Narrow", system-ui, sans-serif;
+  --body:"Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root{ --ink:#eef2f4; --muted:#9fb0bb; --panel:#17232c; --line:#2a3a46; --bg:#0f1b24; }
+}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.45;padding:24px}
+h1{font-family:var(--display);font-weight:800;font-size:22px;margin:0 0 4px}
+.sub{color:var(--muted);font-size:13px;margin:0 0 20px}
+.login{max-width:340px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px}
+.login label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
+input[type=password]{width:100%;font:inherit;font-size:15px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:transparent;color:var(--ink)}
+button{font:inherit;font-size:14px;border-radius:999px;padding:8px 16px;cursor:pointer;border:1px solid var(--ink);background:var(--ink);color:var(--panel);margin-top:12px}
+button:disabled{opacity:.5;cursor:default}
+.error{color:var(--hot);font-size:13px;margin-top:10px}
+.error:empty{display:none}
+table{border-collapse:collapse;width:100%;background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);font-size:13px;white-space:nowrap}
+th{color:var(--muted);font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.03em}
+tr:last-child td{border-bottom:none}
+.on{color:var(--hot);font-weight:700}
+.off{color:var(--cold);font-weight:700}
+.count{color:var(--muted);font-size:13px;margin:0 0 10px}
+.wrap{overflow-x:auto}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<h1>Live homes</h1>
+<p class="sub">Admin view of every home currently reporting. Not linked from the public site.</p>
+
+<section class="login" id="login">
+  <label for="pw">Admin password</label>
+  <input type="password" id="pw" autocomplete="current-password">
+  <div><button id="go">View homes</button></div>
+  <p class="error" id="err"></p>
+</section>
+
+<section id="data" hidden>
+  <p class="count" id="count"></p>
+  <div class="wrap">
+    <table>
+      <thead>
+        <tr><th>Source</th><th>Cell</th><th>Heating</th><th>Target</th><th>Indoor</th><th>Outdoor</th><th>Last report</th></tr>
+      </thead>
+      <tbody id="rows"></tbody>
+    </table>
+  </div>
+</section>
+
+<script>
+const esc = s => String(s).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
+const fmt = v => v == null ? '–' : v + '°C';
+const SOURCE = { home_assistant: 'Home Assistant', hive: 'Hive', other: 'Other' };
+
+const loginSection = document.getElementById('login');
+const dataSection = document.getElementById('data');
+const pwInput = document.getElementById('pw');
+const goBtn = document.getElementById('go');
+const errEl = document.getElementById('err');
+const rowsEl = document.getElementById('rows');
+const countEl = document.getElementById('count');
+
+let authHeader = sessionStorage.getItem('adminAuth') || '';
+let refreshTimer = null;
+
+function render(devices) {
+  countEl.textContent = devices.length + ' home' + (devices.length === 1 ? '' : 's') + ' reporting';
+  rowsEl.innerHTML = devices.map(d => `<tr>
+    <td>${esc(SOURCE[d.source] || d.source)}</td>
+    <td>${d.cell_i}, ${d.cell_j}</td>
+    <td class="${d.heating_on ? 'on' : 'off'}">${d.heating_on ? 'On' : 'Off'}</td>
+    <td>${fmt(d.target_temp)}</td>
+    <td>${fmt(d.indoor_temp)}</td>
+    <td>${fmt(d.outdoor_temp)}</td>
+    <td>${d.minutes_ago}m ago</td>
+  </tr>`).join('');
+}
+
+async function load() {
+  const r = await fetch('/api/v1/admin/devices', { headers: { Authorization: authHeader }, cache: 'no-store' });
+  if (r.status === 401) { sessionStorage.removeItem('adminAuth'); authHeader = ''; showLogin('Wrong password.'); return; }
+  if (r.status === 429) { showLogin('Too many attempts. Try again later.'); return; }
+  if (r.status === 503) { showLogin('Admin access isn\'t configured on the server.'); return; }
+  if (!r.ok) { showLogin('Something went wrong (' + r.status + ').'); return; }
+  render(await r.json());
+}
+
+function showLogin(message) {
+  clearInterval(refreshTimer);
+  dataSection.hidden = true;
+  loginSection.hidden = false;
+  errEl.textContent = message || '';
+  goBtn.disabled = false;
+}
+
+async function tryLoad() {
+  goBtn.disabled = true;
+  try {
+    await load();
+    loginSection.hidden = true;
+    dataSection.hidden = false;
+    clearInterval(refreshTimer);
+    refreshTimer = setInterval(load, 30000);
+  } finally {
+    goBtn.disabled = false;
+  }
+}
+
+goBtn.addEventListener('click', () => {
+  authHeader = 'Basic ' + btoa('admin:' + pwInput.value);
+  sessionStorage.setItem('adminAuth', authHeader);
+  tryLoad();
+});
+pwInput.addEventListener('keydown', e => { if (e.key === 'Enter') goBtn.click(); });
+
+if (authHeader) tryLoad();
+</script>
+</body>
+</html>

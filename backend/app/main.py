@@ -21,6 +21,7 @@ from typing import Literal
 
 from fastapi import Depends, FastAPI, Header, HTTPException, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 from sqlalchemy import select
@@ -50,6 +51,8 @@ if settings.cors_origins:
                        allow_methods=["GET"], allow_headers=["*"])
 
 registration_limiter = RateLimiter(settings.registrations_per_ip_per_hour, 3600)
+admin_limiter = RateLimiter(20, 3600)
+admin_security = HTTPBasic()
 
 
 # ---------- helpers ----------
@@ -77,6 +80,15 @@ def current_device(authorization: str | None = Header(None), db: Session = Depen
     if device is None:
         raise HTTPException(401, "Unknown token")
     return device
+
+
+def require_admin(request: Request, credentials: HTTPBasicCredentials = Depends(admin_security)) -> None:
+    if not settings.admin_password:
+        raise HTTPException(503, "Admin access is not configured")
+    if not admin_limiter.allow(client_ip(request)):
+        raise HTTPException(429, "Too many attempts")
+    if not secrets.compare_digest(credentials.password, settings.admin_password):
+        raise HTTPException(401, "Invalid credentials", headers={"WWW-Authenticate": "Basic"})
 
 
 # ---------- schemas ----------
@@ -148,6 +160,30 @@ def delete_me(device: Device = Depends(current_device), db: Session = Depends(ge
     db.commit()
     _cache.clear()
     return Response(status_code=204)
+
+
+# ---------- admin ----------
+
+@app.get("/api/v1/admin/devices")
+def admin_devices(_: None = Depends(require_admin), db: Session = Depends(get_db)):
+    now = utcnow()
+    cutoff = now - timedelta(minutes=settings.stale_after_minutes)
+    devices = db.scalars(
+        select(Device).where(Device.reported_at >= cutoff).order_by(Device.reported_at.desc())
+    ).all()
+    return [{
+        "id": d.id,
+        "source": d.source,
+        "cell_i": d.cell_i,
+        "cell_j": d.cell_j,
+        "created_at": d.created_at.isoformat() + "Z",
+        "reported_at": d.reported_at.isoformat() + "Z",
+        "minutes_ago": int((now - d.reported_at).total_seconds() // 60),
+        "heating_on": d.heating_on,
+        "target_temp": d.target_temp,
+        "indoor_temp": d.indoor_temp,
+        "outdoor_temp": d.outdoor_temp,
+    } for d in devices]
 
 
 # ---------- public map data ----------
