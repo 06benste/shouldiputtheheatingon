@@ -142,6 +142,8 @@ class Reporter:
             return action in HEATING_ACTIONS
         if climate.state == HVACMode.OFF:
             return False
+        if climate.state == HVACMode.HEAT:
+            return True
         return None  # thermostat doesn't say whether it's actually firing
 
     def build_payload(self) -> dict | None:
