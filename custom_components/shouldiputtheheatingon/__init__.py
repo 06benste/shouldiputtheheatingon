@@ -49,7 +49,8 @@ from .const import (
 )
 
 _LOGGER = logging.getLogger(__name__)
-HEATING_ACTIONS = {"heating", "preheating"}
+# "heat" isn't a valid HVACAction, but some integrations report it anyway.
+HEATING_ACTIONS = {"heating", "preheating", "heat"}
 BAD_STATES = {STATE_UNKNOWN, STATE_UNAVAILABLE}
 PLATFORMS: list[Platform] = [Platform.SENSOR, Platform.BINARY_SENSOR]
 
@@ -107,6 +108,7 @@ class Reporter:
         self.last_report: datetime | None = None
         self.last_heating_on: bool | None = None
         self._auth_error_logged = False
+        self._unknown_logged = False
         self._pending = None
 
     # ----- reading entities -----
@@ -179,8 +181,20 @@ class Reporter:
     async def async_report(self, _now: datetime | None = None) -> None:
         payload = self.build_payload()
         if payload is None:
-            _LOGGER.debug("Heating state unknown right now; skipping this report")
+            if not self._unknown_logged:
+                _LOGGER.warning(
+                    "Can't tell whether the heating is running: %s is unavailable or doesn't "
+                    "report hvac_action. If it never does, choose a heating active sensor "
+                    "in the integration options",
+                    self.entry.options[CONF_CLIMATE],
+                )
+                self._unknown_logged = True
+            # Don't keep showing a stale reading as if it were current.
+            if self.last_heating_on is not None:
+                self.last_heating_on = None
+                async_dispatcher_send(self.hass, signal_update(self.entry.entry_id))
             return
+        self._unknown_logged = False
         try:
             await self.api.report(payload)
         except AuthError:
