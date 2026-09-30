@@ -7,7 +7,7 @@ services:
     environment:
       DATABASE_URL: postgresql+psycopg://heating:heating@db/heating
       CLIENT_IP_HEADER: ""
-      MIN_HOMES_PER_CELL: "3"
+      MIN_HOMES_PER_CELL: "1"
     depends_on:
       - db
   db:

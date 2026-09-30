@@ -1,6 +1,6 @@
 # Running your own server
 
-This covers the backend behind [shouldiputtheheatingon.com](https://shouldiputtheheatingon.com). If you just want to share your own heating status, you don't need any of this — see the main [README](README.md) for installing the Home Assistant integration.
+This covers the backend behind [clownfish-app-57tmd.ondigitalocean.app](https://clownfish-app-57tmd.ondigitalocean.app/). If you just want to share your own heating status, you don't need any of this — see the main [README](README.md) for installing the Home Assistant integration.
 
 ```
 Home Assistant ──(cell + readings, every 5 min)──▶ FastAPI ──▶ Postgres/SQLite
@@ -46,7 +46,7 @@ uvicorn app.main:app --reload
 | `DB_POOL_SIZE` | `5` | Persistent Postgres connections |
 | `DB_MAX_OVERFLOW` | `5` | Extra connections under load. Keep pool + overflow under your database's connection limit |
 | `CLIENT_IP_HEADER` | empty | Header with the real client IP. `do-connecting-ip` on App Platform |
-| `MIN_HOMES_PER_CELL` | `3` | Hide cells with fewer homes |
+| `MIN_HOMES_PER_CELL` | `1` | Hide cells with fewer homes |
 | `STALE_AFTER_MINUTES` | `30` | Readings older than this drop off |
 | `MIN_REPORT_INTERVAL_SECONDS` | `60` | Per-home report throttle |
 | `REGISTRATIONS_PER_IP_PER_HOUR` | `5` | Sign-up throttle |

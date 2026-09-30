@@ -1,11 +1,11 @@
 # Should I put the heating on?
 
-Share your heating status from Home Assistant and see it on a live, anonymous map of homes with their heating on, at [shouldiputtheheatingon.com](https://shouldiputtheheatingon.com).
+Share your heating status from Home Assistant and see it on a live, anonymous map of homes with their heating on, at [clownfish-app-57tmd.ondigitalocean.app](https://clownfish-app-57tmd.ondigitalocean.app/).
 
 ## Privacy design
 
 - **Location is rounded inside Home Assistant.** The integration converts the home location to a grid cell (about 5 km square) and only ever sends the cell indices. The server never sees coordinates.
-- **Sparse areas are hidden.** Cells with fewer than 3 fresh homes aren't shown on the map, though they still count towards the national headline.
+- **Only the area is shown.** Every home with a fresh reading appears on the map as its ~5 km cell, never a precise location. A cell with a single home shows that home's readings.
 - **No history.** Each home has one row holding its latest reading. Nothing is logged over time.
 - **No third-party services.** Outside temperatures come only from each home's own outdoor sensor. An area's outside temperature is the median of its homes' readings. The backend makes no outbound requests.
 - **No identifiers in public data.** The map shows no device IDs, and readings within a cell are shuffled on every refresh.
@@ -30,4 +30,4 @@ Hive has no official public API. Rather than asking people for their Hive passwo
 
 ## Running your own server
 
-The public map is hosted at shouldiputtheheatingon.com, but the backend is open source if you'd rather run your own instance — see [DEPLOYMENT.md](DEPLOYMENT.md).
+The public map is hosted at [clownfish-app-57tmd.ondigitalocean.app](https://clownfish-app-57tmd.ondigitalocean.app/), but the backend is open source if you'd rather run your own instance — see [DEPLOYMENT.md](DEPLOYMENT.md).

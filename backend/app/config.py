@@ -21,7 +21,7 @@ class Settings:
     db_pool_size = _int("DB_POOL_SIZE", 5)
     db_max_overflow = _int("DB_MAX_OVERFLOW", 5)
     # Cells with fewer fresh homes than this are hidden from the map (k-anonymity).
-    min_homes_per_cell = _int("MIN_HOMES_PER_CELL", 3)
+    min_homes_per_cell = _int("MIN_HOMES_PER_CELL", 1)
     # Readings older than this drop off the map.
     stale_after_minutes = _int("STALE_AFTER_MINUTES", 30)
     # Reject reports from one device more often than this.

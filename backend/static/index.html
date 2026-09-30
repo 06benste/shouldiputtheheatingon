@@ -276,7 +276,8 @@ function renderSummary(s, minHomes) {
     `${pct}% of the ${s.homes} ${s.homes === 1 ? 'home' : 'homes'} reporting right now have their heating on.${out}`;
   document.getElementById('bar').style.width = pct + '%';
   document.getElementById('meta').textContent =
-    `Tap a dot to see the homes in that area. Areas with fewer than ${minHomes} homes aren't shown.`;
+    'Tap a dot to see the homes in that area.' +
+    (minHomes > 1 ? ` Areas with fewer than ${minHomes} homes aren't shown.` : '');
 }
 
 // ---------- Feed the dots ----------

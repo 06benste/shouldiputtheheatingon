@@ -38,7 +38,7 @@ services:
         value: do-connecting-ip
       - key: MIN_HOMES_PER_CELL
         scope: RUN_TIME
-        value: "3"
+        value: "1"
       - key: STALE_AFTER_MINUTES
         scope: RUN_TIME
         value: "30"

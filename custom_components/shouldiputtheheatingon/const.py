@@ -3,7 +3,7 @@ from datetime import timedelta
 import math
 
 DOMAIN = "shouldiputtheheatingon"
-DEFAULT_URL = "https://shouldiputtheheatingon.com"
+DEFAULT_URL = "https://clownfish-app-57tmd.ondigitalocean.app"
 
 CONF_URL = "url"
 CONF_TOKEN = "token"
