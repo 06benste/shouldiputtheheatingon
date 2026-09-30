@@ -4,11 +4,7 @@ from __future__ import annotations
 from datetime import datetime
 import logging
 
-from homeassistant.components.climate import (
-    ATTR_CURRENT_TEMPERATURE,
-    ATTR_HVAC_ACTION,
-    HVACMode,
-)
+from homeassistant.components.climate import ATTR_CURRENT_TEMPERATURE, HVACMode
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
     ATTR_TEMPERATURE,
@@ -49,8 +45,8 @@ from .const import (
 )
 
 _LOGGER = logging.getLogger(__name__)
-# "heat" isn't a valid HVACAction, but some integrations report it anyway.
-HEATING_ACTIONS = {"heating", "preheating", "heat"}
+# "On" means the user has the heating switched on, not that it's firing right now.
+HEATING_MODES = {HVACMode.HEAT, HVACMode.HEAT_COOL, HVACMode.AUTO}
 BAD_STATES = {STATE_UNKNOWN, STATE_UNAVAILABLE}
 PLATFORMS: list[Platform] = [Platform.SENSOR, Platform.BINARY_SENSOR]
 
@@ -132,17 +128,12 @@ class Reporter:
             return None
         return self._to_celsius(float(value), self.hass.config.units.temperature_unit)
 
-    def _heating_on(self, climate) -> bool | None:
+    def _heating_on(self, climate) -> bool:
         if active_id := self.entry.options.get(CONF_ACTIVE):
             active = self.hass.states.get(active_id)
             if active is not None and active.state in (STATE_ON, STATE_OFF):
                 return active.state == STATE_ON
-        action = climate.attributes.get(ATTR_HVAC_ACTION)
-        if action is not None:
-            return action in HEATING_ACTIONS
-        if climate.state == HVACMode.OFF:
-            return False
-        return None  # thermostat doesn't say whether it's actually firing
+        return climate.state in HEATING_MODES
 
     def build_payload(self) -> dict | None:
         opts = self.entry.options
@@ -150,8 +141,6 @@ class Reporter:
         if climate is None or climate.state in BAD_STATES:
             return None
         heating_on = self._heating_on(climate)
-        if heating_on is None:
-            return None
 
         target = self._attr_celsius(climate.attributes.get(ATTR_TEMPERATURE))
         indoor = self._sensor_celsius(opts.get(CONF_INDOOR)) if opts.get(CONF_INDOOR) \
@@ -183,9 +172,7 @@ class Reporter:
         if payload is None:
             if not self._unknown_logged:
                 _LOGGER.warning(
-                    "Can't tell whether the heating is running: %s is unavailable or doesn't "
-                    "report hvac_action. If it never does, choose a heating active sensor "
-                    "in the integration options",
+                    "Can't tell whether the heating is on: %s is unavailable",
                     self.entry.options[CONF_CLIMATE],
                 )
                 self._unknown_logged = True

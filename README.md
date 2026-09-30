@@ -17,16 +17,16 @@ Share your heating status from Home Assistant and see it on a live, anonymous ma
 Install through [HACS](https://hacs.xyz): HACS → ⋮ → Custom repositories → add `https://github.com/06benste/shouldiputtheheatingon` with type *Integration*, then download **Should I put the heating on?**. Restart Home Assistant, then add **Should I put the heating on?** under Settings → Devices & services.
 
 You choose:
-- **Thermostat** (required): any `climate` entity. "On" means `hvac_action` is `heating`.
+- **Thermostat** (required): any `climate` entity. "On" means its mode is heat, heat/cool or auto, i.e. the heating is switched on, whether or not it's firing at that moment.
 - **Indoor temperature sensor** (optional): otherwise the thermostat's reading is used.
 - **Outdoor temperature sensor** (required): a physical sensor outside, or the temperature from any weather integration already in Home Assistant.
-- **Heating active sensor** (optional): a `binary_sensor`/`switch` for thermostats that don't report `hvac_action`, such as a boiler relay.
+- **Heating active sensor** (optional): a `binary_sensor`/`switch` that says whether the heating is switched on, if the thermostat's mode doesn't.
 
 It reports every 5 minutes, plus within about a minute of the heating switching on or off. Fahrenheit setups are converted to Celsius. Change entities or refresh your area under the integration's **Configure** button.
 
 ### Hive users
 
-Hive has no official public API. Rather than asking people for their Hive password, use Home Assistant's built-in Hive integration and share its thermostat. It reports `hvac_action`, so no extra sensor is needed.
+Hive has no official public API. Rather than asking people for their Hive password, use Home Assistant's built-in Hive integration and share its thermostat. No extra sensor is needed.
 
 ## Running your own server
 

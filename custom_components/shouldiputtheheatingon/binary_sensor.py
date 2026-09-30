@@ -1,7 +1,7 @@
 """Binary sensor: the heating status last reported to the server."""
 from __future__ import annotations
 
-from homeassistant.components.binary_sensor import BinarySensorDeviceClass, BinarySensorEntity
+from homeassistant.components.binary_sensor import BinarySensorEntity
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -21,7 +21,6 @@ class HeatingStatusSensor(BinarySensorEntity):
 
     _attr_has_entity_name = True
     _attr_name = "Heating status reported"
-    _attr_device_class = BinarySensorDeviceClass.RUNNING
     _attr_icon = "mdi:radiator"
     _attr_should_poll = False
 

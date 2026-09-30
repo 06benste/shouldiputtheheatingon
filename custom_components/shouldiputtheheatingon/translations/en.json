@@ -14,7 +14,7 @@
         "data_description": {
           "indoor_temperature_entity": "Leave empty to use the thermostat's own reading.",
           "outdoor_temperature_entity": "A sensor outside your home, or a weather integration's temperature. Its reading is shown as your area's outside temperature.",
-          "heating_active_entity": "Leave empty to use the thermostat's heating status."
+          "heating_active_entity": "Leave empty to use the thermostat's mode (heat or auto means on)."
         }
       }
     },
