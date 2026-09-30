@@ -21,6 +21,7 @@ from typing import Literal
 
 from fastapi import Depends, FastAPI, Header, HTTPException, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
@@ -46,6 +47,7 @@ async def lifespan(_: FastAPI):
 
 
 app = FastAPI(title="shouldiputtheheatingon", lifespan=lifespan)
+app.add_middleware(GZipMiddleware, minimum_size=1000)   # the map outline is ~170 KB uncompressed
 if settings.cors_origins:
     app.add_middleware(CORSMiddleware, allow_origins=settings.cors_origins,
                        allow_methods=["GET"], allow_headers=["*"])
