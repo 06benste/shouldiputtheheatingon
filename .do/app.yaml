@@ -6,9 +6,9 @@ region: lon            # London; closest to UK users
 
 # Uncomment once the domain's DNS is pointed at DigitalOcean.
 # domains:
-#   - domain: shouldiputtheheatingon.com
+#   - domain: shouldiputtheheatingon.co.uk
 #     type: PRIMARY
-#   - domain: www.shouldiputtheheatingon.com
+#   - domain: www.shouldiputtheheatingon.co.uk
 #     type: ALIAS
 
 services:
@@ -19,7 +19,7 @@ services:
       deploy_on_push: true
     dockerfile_path: Dockerfile
     http_port: 8000
-    # Keep at 1: rate limits are held in memory (see README before scaling).
+    # Keep at 1: rate limits are held in memory, so extra instances would each allow their own quota.
     instance_count: 1
     instance_size_slug: apps-s-1vcpu-0.5gb
     routes:
