@@ -3,9 +3,9 @@ from datetime import timedelta
 import math
 
 DOMAIN = "shouldiputtheheatingon"
-DEFAULT_URL = "https://shouldiputtheheatingon.co.uk"
+API_URL = "https://shouldiputtheheatingon.co.uk"
 
-CONF_URL = "url"
+CONF_URL = "url"  # old entries only; the 1.2 migration removes it
 CONF_TOKEN = "token"
 CONF_DEVICE_ID = "device_id"
 CONF_CELL_I = "cell_i"
@@ -14,7 +14,13 @@ CONF_CLIMATE = "climate_entity"
 CONF_INDOOR = "indoor_temperature_entity"
 CONF_OUTDOOR = "outdoor_temperature_entity"
 CONF_ACTIVE = "heating_active_entity"
+CONF_ACTIVE_ABOVE = "heating_active_above"
 CONF_UPDATE_AREA = "update_area"
+
+# What "heating on" means for this home.
+CONF_ON_MEANS = "heating_on_means"
+ON_MEANS_SWITCHED_ON = "switched_on"  # thermostat in heat/auto mode, firing or not
+ON_MEANS_HEATING = "heating"  # boiler or heat pump running right now
 
 REPORT_INTERVAL = timedelta(minutes=5)
 # The server rejects reports closer together than 60 s.

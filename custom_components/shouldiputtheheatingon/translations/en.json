@@ -3,23 +3,33 @@
     "step": {
       "user": {
         "title": "Share your heating",
-        "description": "You'll need a thermostat and an outdoor temperature sensor. Your home appears on the map as part of the 5 km square centred on {area}. Your exact location never leaves Home Assistant.\n\nIf your thermostat doesn't report whether the boiler is actually firing, pick a sensor or switch that does.",
+        "description": "Your home appears on the map as part of the 5 km square centred on {area}. Your exact location never leaves Home Assistant.\n\nIf your thermostat is always in heat or auto mode and turns the heating on and off by itself, choose **Actively heating**. Otherwise your home will always show as on.",
         "data": {
-          "url": "Website",
-          "climate_entity": "Thermostat",
+          "heating_on_means": "Show my heating as on when"
+        }
+      },
+      "entities": {
+        "title": "Choose your entities",
+        "description": "You'll need at least one thermostat and an outdoor temperature sensor.",
+        "data": {
+          "climate_entity": "Thermostats",
           "indoor_temperature_entity": "Indoor temperature sensor",
           "outdoor_temperature_entity": "Outdoor temperature sensor",
-          "heating_active_entity": "Heating active sensor"
+          "heating_active_entity": "Heating active sensors",
+          "heating_active_above": "Active above"
         },
         "data_description": {
-          "indoor_temperature_entity": "Leave empty to use the thermostat's own reading.",
+          "climate_entity": "Pick every zone if you have more than one. The heating counts as on if any of them is.",
+          "indoor_temperature_entity": "Leave empty to use the average of your thermostats' readings.",
           "outdoor_temperature_entity": "A sensor outside your home, or a weather integration's temperature. Its reading is shown as your area's outside temperature.",
-          "heating_active_entity": "Leave empty to use the thermostat's mode (heat or auto means on)."
+          "heating_active_entity": "Anything that shows the boiler or heat pump is running: a boiler or heat hub sensor, a pump, a compressor, a flow sensor. On/off states and numbers both work. Leave empty to use whether your thermostats say they're calling for heat.",
+          "heating_active_above": "For sensors that report a number, such as pump power or flow rate: count as active above this value. Defaults to 0."
         }
       }
     },
     "error": {
-      "cannot_connect": "Couldn't reach the website. Check the address and try again."
+      "cannot_connect": "Couldn't reach the website. Try again in a few minutes.",
+      "no_hvac_action": "Your thermostats don't say whether they're calling for heat. Pick a sensor that shows the heating is running."
     },
     "abort": {
       "single_instance_allowed": "This home is already sharing its heating.",
@@ -30,14 +40,38 @@
     "step": {
       "init": {
         "title": "Shared heating",
-        "description": "Currently shown in the 5 km square centred on {area}.",
+        "description": "Currently shown in the 5 km square centred on {area}.\n\nIf your thermostat is always in heat or auto mode and turns the heating on and off by itself, choose **Actively heating**.",
         "data": {
-          "climate_entity": "Thermostat",
-          "indoor_temperature_entity": "Indoor temperature sensor",
-          "outdoor_temperature_entity": "Outdoor temperature sensor",
-          "heating_active_entity": "Heating active sensor",
+          "heating_on_means": "Show my heating as on when",
           "update_area": "Update my area from my current home location"
         }
+      },
+      "entities": {
+        "title": "Choose your entities",
+        "data": {
+          "climate_entity": "Thermostats",
+          "indoor_temperature_entity": "Indoor temperature sensor",
+          "outdoor_temperature_entity": "Outdoor temperature sensor",
+          "heating_active_entity": "Heating active sensors",
+          "heating_active_above": "Active above"
+        },
+        "data_description": {
+          "climate_entity": "Pick every zone if you have more than one. The heating counts as on if any of them is.",
+          "indoor_temperature_entity": "Leave empty to use the average of your thermostats' readings.",
+          "heating_active_entity": "Anything that shows the boiler or heat pump is running: a boiler or heat hub sensor, a pump, a compressor, a flow sensor. On/off states and numbers both work. Leave empty to use whether your thermostats say they're calling for heat.",
+          "heating_active_above": "For sensors that report a number, such as pump power or flow rate: count as active above this value. Defaults to 0."
+        }
+      }
+    },
+    "error": {
+      "no_hvac_action": "Your thermostats don't say whether they're calling for heat. Pick a sensor that shows the heating is running."
+    }
+  },
+  "selector": {
+    "heating_on_means": {
+      "options": {
+        "switched_on": "Switched on: a thermostat is in heat or auto mode, even if it isn't firing right now",
+        "heating": "Actively heating: the boiler or heat pump is running right now"
       }
     }
   }
